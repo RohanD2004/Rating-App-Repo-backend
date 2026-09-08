@@ -96,3 +96,6 @@ The server includes a health check endpoint at `/api/v1/health` that returns:
    npm install -g pm2
    pm2 start dist/server.js --name "ratingbackend"
    ```
+add your actual secret in .env file and the run the command 
+first -> npm i  (in project root directory)
+second -> npm run dev in same directory
