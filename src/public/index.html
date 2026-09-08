@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Store Rating API — Documentation</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #161922;
+    --panel-2: #1d2130;
+    --border: #2a2f3f;
+    --text: #e8eaf0;
+    --text-dim: #9aa1b5;
+    --accent: #7c9eff;
+    --accent-2: #ffb86b;
+    --get: #3ecf8e;
+    --post: #f2b93d;
+    --patch: #7c9eff;
+    --code-bg: #0b0d13;
+    --success: #3ecf8e;
+    --danger: #ff6b6b;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+  body { display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  nav.sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .brand {
+    padding: 0 24px 20px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .brand h1 { font-size: 18px; margin: 0 0 4px 0; }
+  .brand p { margin: 0; font-size: 12px; color: var(--text-dim); }
+  .badge-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--success);
+    margin-top: 8px;
+  }
+  .badge-live .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 6px var(--success);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  nav.sidebar .group-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    padding: 16px 24px 6px 24px;
+  }
+  nav.sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 24px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 13.5px;
+  }
+  nav.sidebar a:hover { color: var(--text); background: var(--panel-2); }
+  nav.sidebar a .m {
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 4px;
+    min-width: 34px;
+    text-align: center;
+  }
+  .m-get { background: rgba(62,207,142,0.15); color: var(--get); }
+  .m-post { background: rgba(242,185,61,0.15); color: var(--post); }
+  .m-patch { background: rgba(124,158,255,0.15); color: var(--patch); }
+
+  main { flex: 1; padding: 40px 56px 80px; max-width: 920px; }
+  header.hero { margin-bottom: 40px; }
+  header.hero h1 { font-size: 30px; margin: 0 0 10px; }
+  header.hero p { color: var(--text-dim); font-size: 15px; line-height: 1.6; max-width: 640px; }
+
+  .stack-pills { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+  .pill {
+    background: var(--panel-2); border: 1px solid var(--border);
+    padding: 5px 12px; border-radius: 999px; font-size: 12.5px; color: var(--text-dim);
+  }
+
+  .status-card {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 20px; margin: 24px 0 40px;
+  }
+  .status-card .left { display: flex; align-items: center; gap: 12px; }
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .status-card #dbStatusText, .status-card #apiStatusText { font-size: 13px; color: var(--text-dim); }
+  .status-card button {
+    background: var(--accent); color: #0f1117; border: none;
+    padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .status-card button:hover { opacity: 0.9; }
+
+  section.endpoint-group { margin-bottom: 48px; }
+  section.endpoint-group > h2 {
+    font-size: 20px; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  section.endpoint-group > p.desc { color: var(--text-dim); font-size: 13.5px; margin-top: 0; margin-bottom: 20px; }
+
+  .endpoint {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    scroll-margin-top: 20px;
+  }
+  .endpoint-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .method {
+    font-size: 11px; font-weight: 800; padding: 4px 9px; border-radius: 6px; letter-spacing: 0.03em;
+  }
+  .method.GET { background: rgba(62,207,142,0.15); color: var(--get); }
+  .method.POST { background: rgba(242,185,61,0.15); color: var(--post); }
+  .method.PATCH { background: rgba(124,158,255,0.15); color: var(--patch); }
+  .path { font-family: "SF Mono", Consolas, monospace; font-size: 13.5px; color: var(--text); }
+  .auth-tag {
+    margin-left: auto;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 6px;
+    background: var(--panel-2);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .auth-tag.role-Admin { color: var(--danger); }
+  .auth-tag.role-StoreOwner { color: var(--accent-2); }
+  .auth-tag.role-User { color: var(--accent); }
+
+  .endpoint-body { padding: 16px 18px; }
+  .endpoint-body p.note { margin: 0 0 12px; font-size: 13.5px; color: var(--text-dim); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+  .col-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); margin-bottom: 6px; }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    overflow-x: auto;
+    margin: 0;
+    font-family: "SF Mono", Consolas, monospace;
+  }
+  .try-row { margin-top: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .try-row button {
+    background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+    padding: 7px 14px; border-radius: 8px; font-size: 12.5px; cursor: pointer;
+  }
+  .try-row button:hover { border-color: var(--accent); color: var(--accent); }
+  .try-row input {
+    background: var(--code-bg); border: 1px solid var(--border); color: var(--text);
+    padding: 7px 10px; border-radius: 6px; font-size: 12.5px; font-family: monospace;
+  }
+  .result-box { margin-top: 10px; display: none; }
+  .result-box.show { display: block; }
+  .result-status { font-size: 12px; margin-bottom: 6px; font-weight: 700; }
+  .result-status.ok { color: var(--success); }
+  .result-status.err { color: var(--danger); }
+
+  .validations {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+  }
+  .validations table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .validations th { text-align: left; color: var(--text-dim); font-weight: 600; padding: 8px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  .validations td { padding: 8px 10px; border-top: 1px solid var(--border); }
+
+  footer { color: var(--text-dim); font-size: 12.5px; margin-top: 60px; border-top: 1px solid var(--border); padding-top: 20px; }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="brand">
+    <h1>⭐ Store Rating API</h1>
+    <p>Express · PostgreSQL · Sequelize · JWT</p>
+    <div class="badge-live"><span class="dot"></span> <span id="liveLabel">Checking status…</span></div>
+  </div>
+
+  <div class="group-title">Authentication</div>
+  <a href="#register"><span class="m m-post">POST</span> Register</a>
+  <a href="#login"><span class="m m-post">POST</span> Login</a>
+  <a href="#profile"><span class="m m-get">GET</span> Profile</a>
+  <a href="#password"><span class="m m-patch">PATCH</span> Password</a>
+
+  <div class="group-title">Stores &amp; Ratings</div>
+  <a href="#list-stores"><span class="m m-get">GET</span> List Stores</a>
+  <a href="#submit-rating"><span class="m m-post">POST</span> Submit Rating</a>
+
+  <div class="group-title">Admin</div>
+  <a href="#admin-dashboard"><span class="m m-get">GET</span> Dashboard</a>
+  <a href="#admin-create-user"><span class="m m-post">POST</span> Create User</a>
+  <a href="#admin-list-users"><span class="m m-get">GET</span> List Users</a>
+  <a href="#admin-get-user"><span class="m m-get">GET</span> Get User</a>
+  <a href="#admin-create-store"><span class="m m-post">POST</span> Create Store</a>
+  <a href="#admin-list-stores"><span class="m m-get">GET</span> List Stores</a>
+
+  <div class="group-title">Store Owner</div>
+  <a href="#owner-ratings"><span class="m m-get">GET</span> My Store Ratings</a>
+
+  <div class="group-title">Reference</div>
+  <a href="#validations">Form Validations</a>
+  <a href="#roles">Roles &amp; Access</a>
+</nav>
+
+<main>
+  <header class="hero">
+    <h1>Store Rating Platform — API Reference</h1>
+    <p>
+      A role-based REST API for the Store Rating Platform coding challenge. Three roles —
+      <strong>System Administrator</strong>, <strong>Normal User</strong>, and <strong>Store Owner</strong> —
+      share a single JWT login and get different capabilities based on their role.
+      This page documents every endpoint with live request/response examples you can try
+      directly from your browser against this running server.
+    </p>
+    <div class="stack-pills">
+      <span class="pill">Node.js + Express</span>
+      <span class="pill">PostgreSQL + Sequelize</span>
+      <span class="pill">JWT Auth</span>
+      <span class="pill">Zod Validation</span>
+      <span class="pill">React frontend (separate app)</span>
+    </div>
+  </header>
+
+  <div class="status-card">
+    <div class="left">
+      <div class="status-dot" id="statusDot" style="background:#666"></div>
+      <div>
+        <div id="apiStatusText" style="font-weight:600;">Checking API…</div>
+        <div id="dbStatusText" style="color:var(--text-dim); font-size:12.5px;">Checking database connection…</div>
+      </div>
+    </div>
+    <button onclick="checkHealth()">Re-check health</button>
+  </div>
+
+  <!-- AUTH -->
+  <section class="endpoint-group">
+    <h2>🔐 Authentication</h2>
+    <p class="desc">Registration and login are open to everyone. Every other endpoint requires an <code>Authorization: Bearer &lt;token&gt;</code> header.</p>
+
+    <div class="endpoint" id="register">
+      <div class="endpoint-head">
+        <span class="method POST">POST</span>
+        <span class="path">/api/v1/auth/register</span>
+        <span class="auth-tag">Public</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="note">Creates a Normal User account. Name must be 20–60 characters, password 8–16 characters with 1 uppercase &amp; 1 special character.</p>
+        <div class="cols">
+          <div><div class="col-label">Request body</div>
+            <pre>{
+  "name": "Amol Jagdish Kakde 12345",
+  "email": "amol@gmail.com",
+  "password": "User@123",
+  "address": "123 Main Street, New York"
+}</pre>
+          </div>
+          <div><div class="col-label">Response · 201</div>
+            <pre>{
+  "success": true,
+  "message": "User registered successfully",
+  "data": { "id": 3, "name": "...", "email": "amol@gmail.com" }
+}</pre>
+          </div>
+        </div>
+        <div class="try-row">
+          <button onclick="tryRegister()">▶ Try it</button>
+          <span style="font-size:12px;color:var(--text-dim)">Generates a unique email each click</span>
+        </div>
+        <div class="result-box" id="result-register"><div class="result-status"></div><pre></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="login">
+      <div class="endpoint-head">
+        <span class="method POST">POST</span>
+        <span class="path">/api/v1/auth/login</span>
+        <span class="auth-tag">Public</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="note">Returns a JWT valid for the role stored on the user (Admin / User / StoreOwner). Store the token and send it as <code>Authorization: Bearer &lt;token&gt;</code>.</p>
+        <div class="cols">
+          <div><div class="col-label">Request body</div>
+            <pre>{
+  "email": "amol@gmail.com",
+  "password": "User@123"
+}</pre>
+          </div>
+          <div><div class="col-label">Response · 200</div>
+            <pre>{
+  "success": true,
+  "message": "Login successful",
+  "data": { "token": "eyJhbGciOi...", "user": { "id": 3, "role": "User" } }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="profile">
+      <div class="endpoint-head">
+        <span class="method GET">GET</span>
+        <span class="path">/api/v1/auth/profile</span>
+        <span class="auth-tag">🔒 Any logged-in user</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="note">Returns the profile of the currently authenticated user (password field excluded).</p>
+        <div class="col-label">Response · 200</div>
+        <pre>{
+  "success": true,
+  "data": { "user": { "id": 3, "name": "...", "email": "...", "address": "...", "role": "User", "createdAt": "...", "updatedAt": "..." } }
+}</pre>
+      </div>
+    </div>
+
+    <div class="endpoint" id="password">
+      <div class="endpoint-head">
+        <span class="method PATCH">PATCH</span>
+        <span class="path">/api/v1/auth/password</span>
+        <span class="auth-tag">🔒 Any logged-in user</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="note">Requires the correct current password. New password follows the same strength rule as registration.</p>
+        <div class="col-label">Request body</div>
+        <pre>{ "currentPassword": "User@123", "newPassword": "Pass@456" }</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- STORES -->
+  <section class="endpoint-group">
+    <h2>🏬 Stores &amp; Ratings</h2>
+    <p class="desc">Available to any authenticated user (Normal User, Store Owner, or Admin).</p>
+
+    <div class="endpoint" id="list-stores">
+      <div class="endpoint-head">
+        <span class="method GET">GET</span>
+        <span class="path">/api/v1/stores</span>
+        <span class="auth-tag">🔒 Authenticated</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="note">Supports pagination, search (by name/address), and sorting. <code>userRating</code> reflects the caller's own submitted rating, if any.</p>
+        <div class="col-label">Query params</div>
+        <pre>?search=market&amp;page=1&amp;limit=10&amp;sortBy=name&amp;sortOrder=ASC</pre>
+        <div class="col-label" style="margin-top:12px">Response · 200</div>
+        <pre>{
+  "success": true,
+  "data": {
+    "items": [{ "id": 1, "name": "Central Market Downtown", "address": "...", "overallRating": "4.5", "userRating": 5 }],
+    "pagination": { "page": 1, "limit": 20, "totalItems": 1, "totalPages": 1 }
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="endpoint" id="submit-rating">
+      <div class="endpoint-head">
+        <span class="method POST">POST</span>
+        <span class="path">/api/v1/stores/:storeId/ratings</span>
+        <span class="auth-tag">🔒 Authenticated</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="note">Submits a rating (1–5). Calling it again for the same store updates the existing rating instead of creating a duplicate — enforced by a unique <code>(userId, storeId)</code> index.</p>
+        <div class="col-label">Request body</div>
+        <pre>{ "rating": 5 }</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADMIN -->
+  <section class="endpoint-group">
+    <h2>🛡️ Admin</h2>
+    <p class="desc">Restricted to users with role <code>Admin</code>. Requests from other roles receive <code>403 Insufficient permissions</code>.</p>
+
+    <div class="endpoint" id="admin-dashboard">
+      <div class="endpoint-head"><span class="method GET">GET</span><span class="path">/api/v1/admin/dashboard</span><span class="auth-tag role-Admin">🔒 Admin</span></div>
+      <div class="endpoint-body">
+        <pre>{ "success": true, "data": { "totalUsers": 4, "totalStores": 3, "totalRatings": 12 } }</pre>
+      </div>
+    </div>
+
+    <div class="endpoint" id="admin-create-user">
+      <div class="endpoint-head"><span class="method POST">POST</span><span class="path">/api/v1/admin/users</span><span class="auth-tag role-Admin">🔒 Admin</span></div>
+      <div class="endpoint-body">
+        <p class="note">Role must be one of <code>Admin</code>, <code>User</code>, <code>StoreOwner</code>.</p>
+        <pre>{
+  "name": "rohan Sanjay ghuge store owner",
+  "email": "ehgt@example.com",
+  "password": "Ehgt@123",
+  "address": "789 Business Avenue",
+  "role": "StoreOwner"
+}</pre>
+      </div>
+    </div>
+
+    <div class="endpoint" id="admin-list-users">
+      <div class="endpoint-head"><span class="method GET">GET</span><span class="path">/api/v1/admin/users</span><span class="auth-tag role-Admin">🔒 Admin</span></div>
+      <div class="endpoint-body">
+        <p class="note">Filter with <code>?name=&amp;email=&amp;address=&amp;role=</code> and sort with <code>?sortBy=&amp;sortOrder=</code>.</p>
+      </div>
+    </div>
+
+    <div class="endpoint" id="admin-get-user">
+      <div class="endpoint-head"><span class="method GET">GET</span><span class="path">/api/v1/admin/users/:userId</span><span class="auth-tag role-Admin">🔒 Admin</span></div>
+      <div class="endpoint-body"><p class="note">If the user is a Store Owner, their store's average rating is included under <code>managedStore.averageRating</code>.</p></div>
+    </div>
+
+    <div class="endpoint" id="admin-create-store">
+      <div class="endpoint-head"><span class="method POST">POST</span><span class="path">/api/v1/admin/stores</span><span class="auth-tag role-Admin">🔒 Admin</span></div>
+      <div class="endpoint-body">
+        <pre>{
+  "name": "Central Market Downtown",
+  "email": "store@example.com",
+  "address": "456 Market Street, New York",
+  "ownerId": 4
+}</pre>
+      </div>
+    </div>
+
+    <div class="endpoint" id="admin-list-stores">
+      <div class="endpoint-head"><span class="method GET">GET</span><span class="path">/api/v1/admin/stores</span><span class="auth-tag role-Admin">🔒 Admin</span></div>
+      <div class="endpoint-body"><p class="note">Returns every store with its computed overall rating.</p></div>
+    </div>
+  </section>
+
+  <!-- OWNER -->
+  <section class="endpoint-group">
+    <h2>🧑‍💼 Store Owner</h2>
+    <p class="desc">Restricted to role <code>StoreOwner</code>. A store owner may only view ratings for a store they own.</p>
+
+    <div class="endpoint" id="owner-ratings">
+      <div class="endpoint-head"><span class="method GET">GET</span><span class="path">/api/v1/owner/stores/:storeId/ratings</span><span class="auth-tag role-StoreOwner">🔒 Store Owner</span></div>
+      <div class="endpoint-body">
+        <pre>{
+  "success": true,
+  "data": {
+    "store": { "id": 1, "name": "Central Market Downtown", ... },
+    "averageRating": 4.5,
+    "ratings": [{ "id": 1, "rating": 5, "user": { "id": 1, "name": "...", "email": "..." } }]
+  }
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="endpoint-group" id="validations">
+    <h2>✅ Form Validations</h2>
+    <div class="validations">
+      <table>
+        <tr><th>Field</th><th>Rule</th></tr>
+        <tr><td>Name</td><td>20–60 characters</td></tr>
+        <tr><td>Address</td><td>Max 400 characters</td></tr>
+        <tr><td>Password</td><td>8–16 characters, at least 1 uppercase letter and 1 special character</td></tr>
+        <tr><td>Email</td><td>Standard email format</td></tr>
+        <tr><td>Rating</td><td>Integer, 1–5</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="endpoint-group" id="roles">
+    <h2>👥 Roles &amp; Access</h2>
+    <div class="validations">
+      <table>
+        <tr><th>Role</th><th>Can access</th></tr>
+        <tr><td>Admin</td><td>Everything under <code>/admin</code>, plus all authenticated endpoints</td></tr>
+        <tr><td>User</td><td><code>/stores</code>, submitting ratings, profile/password</td></tr>
+        <tr><td>StoreOwner</td><td><code>/owner/stores/:id/ratings</code>, profile/password</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    Store Rating Platform API — built with Express, Sequelize &amp; PostgreSQL. This page is served directly by the backend at <code>/</code>.
+  </footer>
+</main>
+
+<script>
+  const BASE = '';
+
+  async function checkHealth() {
+    const dot = document.getElementById('statusDot');
+    const apiText = document.getElementById('apiStatusText');
+    const dbText = document.getElementById('dbStatusText');
+    const liveLabel = document.getElementById('liveLabel');
+    try {
+      const res = await fetch(BASE + '/api/v1/health');
+      const data = await res.json();
+      if (res.ok && data.status === 'UP') {
+        dot.style.background = '#3ecf8e';
+        apiText.textContent = 'API is running';
+        dbText.textContent = 'Node ' + data.nodeVersion + ' · uptime ' + Math.round(data.uptime) + 's · env ' + data.environment;
+        liveLabel.textContent = 'API online';
+      } else {
+        throw new Error('unhealthy');
+      }
+    } catch (e) {
+      dot.style.background = '#ff6b6b';
+      apiText.textContent = 'API unreachable';
+      dbText.textContent = 'Could not reach ' + BASE + '/api/v1/health';
+      liveLabel.textContent = 'API offline';
+    }
+  }
+  checkHealth();
+
+  async function tryRegister() {
+    const box = document.getElementById('result-register');
+    const statusEl = box.querySelector('.result-status');
+    const pre = box.querySelector('pre');
+    box.classList.add('show');
+    statusEl.textContent = 'Sending…';
+    statusEl.className = 'result-status';
+    const email = 'demo' + Date.now() + '@example.com';
+    try {
+      const res = await fetch(BASE + '/api/v1/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Demo User From API Docs Page',
+          email,
+          password: 'Demo@123',
+          address: '1 Documentation Lane'
+        })
+      });
+      const data = await res.json();
+      statusEl.textContent = res.status + ' ' + (res.ok ? 'OK' : 'Error');
+      statusEl.className = 'result-status ' + (res.ok ? 'ok' : 'err');
+      pre.textContent = JSON.stringify(data, null, 2);
+    } catch (e) {
+      statusEl.textContent = 'Network error';
+      statusEl.className = 'result-status err';
+      pre.textContent = String(e);
+    }
+  }
+</script>
+
+</body>
+</html>
